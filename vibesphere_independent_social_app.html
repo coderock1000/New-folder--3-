@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeSphere - Futuristic Social Platform</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        vibe: {
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                            cyan: '#06b6d4',
+                            amber: '#f59e0b',
+                            emerald: '#10b981',
+                            dark: '#080811',
+                            card: 'rgba(20, 20, 35, 0.65)'
+                        }
+                    },
+                    keyframes: {
+                        aurora: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.06)' }
+                        },
+                        heartPop: {
+                            '0%': { transform: 'scale(0) rotate(-20deg)', opacity: '0' },
+                            '50%': { transform: 'scale(1.4) rotate(0deg)', opacity: '1' },
+                            '75%': { transform: 'scale(0.9)', opacity: '0.9' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        burstParticle: {
+                            '0%': { transform: 'translate(0, 0) scale(1)', opacity: '1' },
+                            '100%': { transform: 'translate(var(--tw-translate-x), var(--tw-translate-y)) scale(0)', opacity: '0' }
+                        }
+                    },
+                    animation: {
+                        'aurora': 'aurora 10s ease infinite',
+                        'pulse-glow': 'pulseGlow 6s ease-in-out infinite',
+                        'heart-pop': 'heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'burst': 'burstParticle 0.8s ease-out forwards'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #06060e;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        h1, h2, h3, .font-space {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Ambient Orbs */
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            transition: all 1s ease;
+        }
+
+        /* Glassmorphic UI */
+        .vibe-glass {
+            background: rgba(18, 18, 32, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .vibe-ring {
+            background: linear-gradient(135deg, #06b6d4, #8b5cf6, #ec4899, #f59e0b);
+            background-size: 300% 300%;
+            animation: aurora 6s ease infinite;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Photo Filters */
+        .filter-cyberpunk { filter: contrast(130%) saturate(150%) hue-rotate(-20deg) brightness(105%); }
+        .filter-vaporwave { filter: contrast(115%) saturate(140%) hue-rotate(40deg) brightness(110%); }
+        .filter-emerald { filter: contrast(120%) saturate(130%) hue-rotate(90deg) sepia(20%); }
+        .filter-noir { filter: grayscale(100%) contrast(160%) brightness(95%); }
+        .filter-warmglow { filter: sepia(40%) saturate(150%) brightness(105%) contrast(110%); }
+
+        /* Custom heart particle container */
+        .particle-container {
+            position: absolute;
+            pointer-events: none;
+            inset: 0;
+            z-index: 30;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col md:flex-row text-gray-100">
+
+    <!-- Ambient Glowing Backdrop -->
+    <div class="ambient-bg">
+        <div id="orb1" class="orb w-[500px] h-[500px] bg-purple-600/30 -top-20 -left-20 animate-pulse-glow"></div>
+        <div id="orb2" class="orb w-[550px] h-[550px] bg-pink-600/25 -bottom-20 -right-20 animate-pulse-glow" style="animation-delay: 2s;"></div>
+        <div id="orb3" class="orb w-[400px] h-[400px] bg-cyan-600/20 top-1/2 left-1/3 animate-pulse-glow" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex flex-col justify-between w-20 xl:w-64 h-screen sticky top-0 p-4 z-40">
+        <div class="vibe-glass h-full rounded-3xl p-4 flex flex-col justify-between">
+            <div class="space-y-6">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 px-2 py-1 cursor-pointer" onclick="switchTab('home')">
+                    <div class="w-11 h-11 rounded-2xl vibe-ring flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-pink-500/30">
+                        🌐
+                    </div>
+                    <span class="hidden xl:inline text-2xl font-black font-space bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 bg-clip-text text-transparent tracking-tight">
+                        VibeSphere
+                    </span>
+                </div>
+
+                <!-- Nav Menu -->
+                <nav class="space-y-2" id="sidebarNav">
+                    <!-- Navigation rendered dynamically -->
+                </nav>
+            </div>
+
+            <!-- Create Button & Sound Toggle -->
+            <div class="space-y-3 pt-4 border-t border-white/10">
+                <button onclick="openCreateModal()" class="w-full flex items-center justify-center xl:justify-start gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:brightness-110 font-bold text-white shadow-lg shadow-purple-500/25 transition-all active:scale-95">
+                    <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                    <span class="hidden xl:inline font-space">Create Vibe</span>
+                </button>
+
+                <button id="soundToggleBtn" onclick="toggleSound()" class="w-full flex items-center justify-center xl:justify-start gap-3 p-3 rounded-2xl hover:bg-white/10 transition-colors text-xs font-semibold text-gray-400 hover:text-white">
+                    <i data-lucide="volume-2" id="soundIcon" class="w-5 h-5 text-cyan-400"></i>
+                    <span class="hidden xl:inline">Audio FX: <span id="soundStatus" class="text-emerald-400">ON</span></span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MOBILE HEADER -->
+    <header class="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 vibe-glass border-b border-white/10">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('home')">
+            <div class="w-8 h-8 rounded-xl vibe-ring flex items-center justify-center text-white font-bold text-sm">🌐</div>
+            <span class="text-xl font-black font-space bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+                VibeSphere
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openCreateModal()" class="p-2.5 rounded-xl bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
+            <button onclick="toggleNotificationsDrawer()" class="p-2.5 rounded-xl bg-white/5 border border-white/10 relative">
+                <i data-lucide="bell" class="w-5 h-5 text-purple-400"></i>
+                <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-pink-500 rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-full min-h-screen pb-24 md:pb-6 p-2 sm:p-5 z-10 overflow-y-auto">
+
+        <!-- TAB 1: HOME FEED -->
+        <section id="tab-home" class="view-tab max-w-2xl mx-auto space-y-6">
+            <!-- STORIES CAROUSEL -->
+            <div class="vibe-glass p-4 rounded-3xl relative overflow-hidden">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <span class="text-xs font-bold font-space uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-pink-500 animate-ping"></span> Live Vibe Moments
+                    </span>
+                    <span class="text-[11px] text-gray-400 cursor-pointer hover:text-white" onclick="triggerToast('Moments Refreshed', 'Loaded latest aura stories')">Refresh</span>
+                </div>
+                <div class="flex items-center gap-4 overflow-x-auto no-scrollbar py-1" id="storiesContainer">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- FEED POSTS -->
+            <div id="feedPosts" class="space-y-6">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 2: EXPLORE GRID -->
+        <section id="tab-explore" class="view-tab hidden max-w-5xl mx-auto space-y-6">
+            <!-- Search & Filters -->
+            <div class="vibe-glass p-4 rounded-3xl space-y-4">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-gray-400"></i>
+                    <input type="text" id="exploreSearch" oninput="renderExploreGrid(this.value)" placeholder="Search vibes, creators, tags..." 
+                           class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-pink-500/60 transition-all">
+                </div>
+
+                <!-- Tag Chips -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1" id="exploreTags">
+                    <button onclick="filterExploreTag('All')" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold flex-shrink-0">✨ All</button>
+                    <button onclick="filterExploreTag('Cyberpunk')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 flex-shrink-0">🌆 #Cyberpunk</button>
+                    <button onclick="filterExploreTag('3D')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 flex-shrink-0">🎨 #3D</button>
+                    <button onclick="filterExploreTag('Music')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 flex-shrink-0">🎧 #Music</button>
+                    <button onclick="filterExploreTag('Tech')" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 flex-shrink-0">🚀 #Tech</button>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="exploreGrid">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 3: VIBE STUDIO / FILTER PHOTO LAB -->
+        <section id="tab-studio" class="view-tab hidden max-w-3xl mx-auto space-y-6">
+            <div class="vibe-glass p-6 rounded-3xl border border-white/10 space-y-6">
+                <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold font-space text-white flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-6 h-6 text-pink-400"></i> Interactive Vibe Studio
+                        </h2>
+                        <p class="text-xs text-gray-400">Tune photo parameters in real-time and broadcast to feed</p>
+                    </div>
+                    <label class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl text-xs font-bold cursor-pointer hover:brightness-110 active:scale-95 transition-all">
+                        Upload Custom Photo
+                        <input type="file" accept="image/*" class="hidden" onchange="loadStudioUpload(event)">
+                    </label>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Photo Canvas Preview -->
+                    <div class="relative h-80 rounded-2xl bg-black/50 border border-white/10 overflow-hidden flex items-center justify-center">
+                        <img id="studioPreview" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover transition-all">
+                    </div>
+
+                    <!-- Sliders Engine -->
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+                                <span>Hue Rotate</span>
+                                <span id="val-hue">0deg</span>
+                            </div>
+                            <input type="range" id="studio-hue" min="-180" max="180" value="0" oninput="updateStudioFilter()" class="w-full accent-pink-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+                                <span>Saturation</span>
+                                <span id="val-saturate">100%</span>
+                            </div>
+                            <input type="range" id="studio-saturate" min="0" max="300" value="100" oninput="updateStudioFilter()" class="w-full accent-purple-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+                                <span>Contrast</span>
+                                <span id="val-contrast">100%</span>
+                            </div>
+                            <input type="range" id="studio-contrast" min="50" max="250" value="100" oninput="updateStudioFilter()" class="w-full accent-cyan-400">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+                                <span>Brightness</span>
+                                <span id="val-brightness">100%</span>
+                            </div>
+                            <input type="range" id="studio-brightness" min="50" max="200" value="100" oninput="updateStudioFilter()" class="w-full accent-amber-400">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+                                <span>Blur Radius</span>
+                                <span id="val-blur">0px</span>
+                            </div>
+                            <input type="range" id="studio-blur" min="0" max="10" value="0" oninput="updateStudioFilter()" class="w-full accent-emerald-400">
+                        </div>
+
+                        <div class="pt-2 flex gap-2">
+                            <button onclick="resetStudioFilters()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold">Reset</button>
+                            <button onclick="postFromStudio()" class="flex-1 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl text-xs font-bold text-white shadow-lg hover:brightness-110 active:scale-95 transition-all">Publish Studio Vibe ✨</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: USER PROFILE PAGE -->
+        <section id="tab-profile" class="view-tab hidden max-w-4xl mx-auto space-y-6">
+            <!-- Profile Info Header -->
+            <div class="vibe-glass rounded-3xl p-6 border border-white/10 space-y-6">
+                <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl p-1 vibe-ring flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full rounded-2xl object-cover border-2 border-black">
+                    </div>
+
+                    <div class="flex-1 text-center sm:text-left space-y-3">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-2xl font-bold font-space flex items-center justify-center sm:justify-start gap-2">
+                                    Elena Rostova <i data-lucide="badge-check" class="w-5 h-5 text-cyan-400"></i>
+                                </h2>
+                                <p class="text-xs text-gray-400">@elena_vibes • Digital Artist & Synth Enthusiast</p>
+                            </div>
+                            <button onclick="triggerToast('Settings', 'Aura preferences synced')" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-2xl text-xs font-bold border border-white/10">
+                                Edit Profile
+                            </button>
+                        </div>
+
+                        <div class="flex justify-center sm:justify-start gap-6 text-sm py-2 border-y border-white/10">
+                            <div><strong id="profilePostCount" class="text-white font-space">0</strong> <span class="text-xs text-gray-400">Vibes</span></div>
+                            <div><strong class="text-white font-space">38.4k</strong> <span class="text-xs text-gray-400">Resonators</span></div>
+                            <div><strong class="text-white font-space">99.8%</strong> <span class="text-xs text-gray-400">Aura Score</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-tabs (My Vibes, Saved, Liked) -->
+                <div class="flex border-b border-white/10 gap-6 text-xs font-bold">
+                    <button id="subtab-my" onclick="switchProfileSubtab('my')" class="pb-3 text-pink-400 border-b-2 border-pink-400">My Vibes</button>
+                    <button id="subtab-saved" onclick="switchProfileSubtab('saved')" class="pb-3 text-gray-400 hover:text-white">Saved Vault</button>
+                    <button id="subtab-liked" onclick="switchProfileSubtab('liked')" class="pb-3 text-gray-400 hover:text-white">Liked Vibes</button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 sm:gap-4" id="profileGrid">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 vibe-glass border-t border-white/10 flex justify-around p-3" id="mobileBottomNav">
+        <!-- Rendered dynamically -->
+    </nav>
+
+    <!-- CREATE POST MODAL -->
+    <div id="createModal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="vibe-glass w-full max-w-lg rounded-3xl border border-white/10 p-6 space-y-5 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="font-bold font-space text-lg flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-pink-400"></i> Broadcast New Vibe
+                </h3>
+                <button onclick="closeCreateModal()" class="p-1 hover:bg-white/10 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Preview / Image Source -->
+                <div class="relative h-56 rounded-2xl bg-black/50 border-2 border-dashed border-white/20 overflow-hidden group flex items-center justify-center">
+                    <img id="createModalPreview" src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover filter-cyberpunk">
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="createModalUrl" placeholder="Paste Image URL or pick upload ->" class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-pink-500">
+                    <label class="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold cursor-pointer flex items-center">
+                        Upload
+                        <input type="file" accept="image/*" class="hidden" onchange="handleModalUpload(event)">
+                    </label>
+                </div>
+
+                <!-- Filter Selectors -->
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Filter Preset:</label>
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                        <button type="button" onclick="setModalFilter('filter-cyberpunk')" class="px-3 py-1.5 rounded-xl bg-pink-500/20 border border-pink-500/40 text-xs font-bold text-pink-300">Cyberpunk</button>
+                        <button type="button" onclick="setModalFilter('filter-vaporwave')" class="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-xs font-bold text-purple-300">Vaporwave</button>
+                        <button type="button" onclick="setModalFilter('filter-emerald')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-xs font-bold text-emerald-300">Emerald</button>
+                        <button type="button" onclick="setModalFilter('filter-noir')" class="px-3 py-1.5 rounded-xl bg-gray-500/20 border border-gray-500/40 text-xs font-bold text-gray-300">Noir Chrome</button>
+                    </div>
+                </div>
+
+                <input type="text" id="createModalLocation" placeholder="Location Tag (e.g., Neo Tokyo Grid)" class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none focus:border-pink-500">
+                <textarea id="createModalCaption" placeholder="Write a caption..." class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none focus:border-pink-500 h-20 resize-none"></textarea>
+
+                <button onclick="submitNewPost()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 font-bold font-space text-white shadow-lg hover:brightness-110 active:scale-95 transition-all">
+                    Broadcast Vibe ✨
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STORY FULLSCREEN MODAL -->
+    <div id="storyModal" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center backdrop-blur-xl">
+        <button onclick="closeStoryModal()" class="absolute top-5 right-5 text-white/70 hover:text-white z-50 p-2">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+
+        <div class="relative w-full max-w-sm h-[80vh] rounded-3xl overflow-hidden vibe-glass border border-white/20 shadow-2xl flex flex-col justify-between">
+            <!-- Progress Bar -->
+            <div class="absolute top-3 left-3 right-3 z-30 flex gap-1">
+                <div class="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+                    <div id="storyProgressBar" class="h-full bg-gradient-to-r from-pink-500 to-cyan-400 w-0 transition-all duration-100 ease-linear"></div>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <div class="absolute top-6 left-3 right-3 z-30 flex items-center justify-between text-white">
+                <div class="flex items-center gap-2">
+                    <img id="storyModalAvatar" src="" class="w-8 h-8 rounded-full object-cover border border-pink-500">
+                    <span id="storyModalUser" class="font-bold text-xs"></span>
+                </div>
+            </div>
+
+            <img id="storyModalImg" src="" class="w-full h-full object-cover">
+
+            <!-- Click areas -->
+            <div class="absolute inset-0 flex z-20">
+                <div onclick="prevStory()" class="w-1/2 h-full"></div>
+                <div onclick="nextStory()" class="w-1/2 h-full"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS DRAWER -->
+    <div id="notificationsDrawer" class="fixed top-16 right-4 z-40 w-80 vibe-glass rounded-3xl border border-white/10 p-4 shadow-2xl hidden space-y-3">
+        <div class="flex justify-between items-center border-b border-white/10 pb-2">
+            <span class="font-bold font-space text-xs text-pink-400 flex items-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i> Activity Pulse</span>
+            <button onclick="toggleNotificationsDrawer()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-2 text-xs" id="notificationList">
+            <div class="p-2.5 rounded-xl bg-white/5 flex items-center gap-3">
+                <span class="p-1.5 rounded-lg bg-pink-500/20 text-pink-400">💖</span>
+                <div><strong>@neon_lisa</strong> liked your Vibe post</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 flex items-center gap-3">
+                <span class="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400">💬</span>
+                <div><strong>@cyber_kai</strong> commented: "Incredible colors!"</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST HUD -->
+    <div id="toastHud" class="fixed top-5 right-5 z-50 transform -translate-y-40 transition-transform duration-300 vibe-glass border border-white/20 rounded-2xl p-4 flex items-center gap-3 shadow-2xl">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <h5 id="toastTitle" class="font-bold text-xs text-white"></h5>
+            <p id="toastMessage" class="text-[11px] text-gray-300"></p>
+        </div>
+    </div>
+
+    <script>
+        // WEB AUDIO API SYNTHESIZER
+        const AudioFX = {
+            ctx: null,
+            enabled: true,
+            init() {
+                if(!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.1) {
+                if(!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            likeSound() {
+                this.playTone(523.25, 'triangle', 0.1);
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.15), 60);
+            },
+            clickSound() {
+                this.playTone(440, 'sine', 0.05);
+            }
+        };
+
+        function toggleSound() {
+            AudioFX.enabled = !AudioFX.enabled;
+            document.getElementById('soundStatus').innerText = AudioFX.enabled ? 'ON' : 'OFF';
+            document.getElementById('soundStatus').className = AudioFX.enabled ? 'text-emerald-400' : 'text-rose-400';
+            triggerToast('Audio FX Updated', `Sound effects ${AudioFX.enabled ? 'enabled' : 'muted'}`);
+        }
+
+        // DEFAULT INITIAL DATA STORE
+        const INITIAL_POSTS = [
+            {
+                id: 101,
+                user: 'cyber_kai',
+                location: 'Neo Tokyo Grid 09',
+                avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
+                image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+                caption: 'Synthesized dawn in high contrast. The digital visual landscape is expanding! 🌌⚡',
+                filter: 'filter-cyberpunk',
+                tag: 'Cyberpunk',
+                likes: 1842,
+                liked: false,
+                saved: false,
+                comments: [
+                    { user: 'neon_lisa', text: 'Insane colors on this aura!' },
+                    { user: 'lofi_synth', text: 'Needs a synthwave backdrop track 🔥' }
+                ]
+            },
+            {
+                id: 102,
+                user: 'neon_lisa',
+                location: 'San Francisco, CA',
+                avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+                image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
+                caption: 'Golden hour reflections on glass structures. Minimalist architectural vibes 🏛️',
+                filter: 'filter-warmglow',
+                tag: '3D',
+                likes: 3910,
+                liked: true,
+                saved: true,
+                comments: [
+                    { user: 'aura_art', text: 'Perfection! ✨' }
+                ]
+            }
+        ];
+
+        const STORIES = [
+            { id: 1, user: 'cyber_kai', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80' },
+            { id: 2, user: 'neon_lisa', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', img: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=600&q=80' },
+            { id: 3, user: 'lofi_synth', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80', img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80' }
+        ];
+
+        // APP STATE PERSISTENCE
+        let STATE = {
+            activeTab: 'home',
+            profileSubtab: 'my',
+            currentModalFilter: 'filter-cyberpunk',
+            currentStoryIndex: 0,
+            storyTimer: null,
+            posts: []
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem('VIBESPHERE_POSTS');
+            if(saved) {
+                try { STATE.posts = JSON.parse(saved); } catch(e) { STATE.posts = INITIAL_POSTS; }
+            } else {
+                STATE.posts = INITIAL_POSTS;
+                saveState();
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('VIBESPHERE_POSTS', JSON.stringify(STATE.posts));
+        }
+
+        // NAV DATA
+        const NAV_ITEMS = [
+            { id: 'home', label: 'Feed', icon: 'sparkles' },
+            { id: 'explore', label: 'Explore', icon: 'compass' },
+            { id: 'studio', label: 'Vibe Studio', icon: 'sliders' },
+            { id: 'profile', label: 'Profile', icon: 'user' }
+        ];
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderSidebarNav();
+            renderStories();
+            renderFeedPosts();
+            renderExploreGrid();
+            renderProfileGrid();
+            lucide.createIcons();
+        });
+
+        function switchTab(tabId) {
+            AudioFX.clickSound();
+            STATE.activeTab = tabId;
+            document.querySelectorAll('.view-tab').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            renderSidebarNav();
+            lucide.createIcons();
+        }
+
+        function renderSidebarNav() {
+            const sidebar = document.getElementById('sidebarNav');
+            sidebar.innerHTML = NAV_ITEMS.map(item => `
+                <button onclick="switchTab('${item.id}')" 
+                        class="w-full flex items-center gap-4 p-3 rounded-2xl transition-all ${STATE.activeTab === item.id ? 'bg-white/10 text-pink-400 border border-white/10 font-bold scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}">
+                    <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                    <span class="hidden xl:inline text-sm font-space">${item.label}</span>
+                </button>
+            `).join('');
+
+            const mobileNav = document.getElementById('mobileBottomNav');
+            mobileNav.innerHTML = NAV_ITEMS.map(item => `
+                <button onclick="switchTab('${item.id}')" class="flex flex-col items-center p-1.5 transition-all ${STATE.activeTab === item.id ? 'text-pink-400 scale-110' : 'text-gray-500'}">
+                    <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                </button>
+            `).join('');
+        }
+
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            container.innerHTML = STORIES.map((story, idx) => `
+                <div onclick="openStoryModal(${idx})" class="flex flex-col items-center gap-1.5 cursor-pointer flex-shrink-0 group">
+                    <div class="w-16 h-16 rounded-2xl p-0.5 vibe-ring group-hover:scale-105 transition-transform">
+                        <img src="${story.avatar}" class="w-full h-full rounded-xl object-cover border border-black">
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-300 truncate w-16 text-center">@${story.user}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFeedPosts() {
+            const container = document.getElementById('feedPosts');
+            container.innerHTML = STATE.posts.map(post => `
+                <article class="vibe-glass rounded-3xl border border-white/10 overflow-hidden shadow-xl relative">
+                    <div class="particle-container" id="particles-${post.id}"></div>
+                    <!-- Header -->
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl p-0.5 vibe-ring">
+                                <img src="${post.avatar}" class="w-full h-full rounded-lg object-cover border border-black">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs font-space">${post.user}</h4>
+                                <p class="text-[10px] text-gray-400">${post.location}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="relative overflow-hidden cursor-pointer" ondblclick="handleDoubleTap(event, ${post.id})">
+                        <img src="${post.image}" class="w-full h-[380px] sm:h-[420px] object-cover ${post.filter}">
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <button onclick="toggleLike(${post.id})" class="transition-transform active:scale-125">
+                                    <i data-lucide="heart" class="w-6 h-6 ${post.liked ? 'text-pink-500 fill-pink-500 animate-heart-pop' : 'text-gray-300 hover:text-pink-400'}"></i>
+                                </button>
+                                <button onclick="focusCommentInput(${post.id})" class="text-gray-300 hover:text-cyan-400">
+                                    <i data-lucide="message-square" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                            <button onclick="toggleSave(${post.id})" class="text-gray-300">
+                                <i data-lucide="bookmark" class="w-6 h-6 ${post.saved ? 'text-cyan-400 fill-cyan-400' : 'hover:text-cyan-400'}"></i>
+                            </button>
+                        </div>
+
+                        <p class="font-bold text-xs font-space"><span>${post.likes.toLocaleString()}</span> Resonances</p>
+                        <p class="text-xs text-gray-300"><strong class="font-space mr-1 text-white">${post.user}</strong> ${post.caption}</p>
+
+                        <!-- Comments Section -->
+                        <div class="space-y-1.5 pt-2 border-t border-white/5">
+                            ${post.comments.map(c => `
+                                <div class="text-[11px]"><strong class="text-pink-400 mr-1">@${c.user}:</strong> <span class="text-gray-300">${c.text}</span></div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Add comment form -->
+                        <form onsubmit="submitComment(event, ${post.id})" class="flex items-center gap-2 pt-2">
+                            <input type="text" id="comment-input-${post.id}" placeholder="Add a comment..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-pink-500">
+                            <button type="submit" class="text-xs font-bold text-pink-400 hover:underline">Post</button>
+                        </form>
+                    </div>
+                </article>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function toggleLike(id) {
+            const post = STATE.posts.find(p => p.id === id);
+            if(post) {
+                post.liked = !post.liked;
+                post.likes += post.liked ? 1 : -1;
+                if(post.liked) {
+                    AudioFX.likeSound();
+                    spawnParticles(id);
+                }
+                saveState();
+                renderFeedPosts();
+                renderProfileGrid();
+            }
+        }
+
+        function handleDoubleTap(e, id) {
+            const post = STATE.posts.find(p => p.id === id);
+            if(post && !post.liked) {
+                toggleLike(id);
+            }
+        }
+
+        function spawnParticles(postId) {
+            const container = document.getElementById(`particles-${postId}`);
+            if(!container) return;
+            container.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute text-pink-500 animate-burst';
+                particle.innerText = '💖';
+                const x = (Math.random() - 0.5) * 200;
+                const y = (Math.random() - 0.5) * 200;
+                particle.style.setProperty('--tw-translate-x', `${x}px`);
+                particle.style.setProperty('--tw-translate-y', `${y}px`);
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                container.appendChild(particle);
+            }
+        }
+
+        function toggleSave(id) {
+            AudioFX.clickSound();
+            const post = STATE.posts.find(p => p.id === id);
+            if(post) {
+                post.saved = !post.saved;
+                saveState();
+                renderFeedPosts();
+                renderProfileGrid();
+                triggerToast(post.saved ? 'Saved Vibe' : 'Removed Vibe', 'Updated in saved vault');
+            }
+        }
+
+        function submitComment(e, postId) {
+            e.preventDefault();
+            const input = document.getElementById(`comment-input-${postId}`);
+            if(!input.value.trim()) return;
+
+            AudioFX.clickSound();
+            const post = STATE.posts.find(p => p.id === postId);
+            post.comments.push({ user: 'you', text: input.value.trim() });
+            input.value = '';
+            saveState();
+            renderFeedPosts();
+        }
+
+        function focusCommentInput(postId) {
+            document.getElementById(`comment-input-${postId}`).focus();
+        }
+
+        function renderExploreGrid(filterText = '') {
+            const grid = document.getElementById('exploreGrid');
+            const filtered = STATE.posts.filter(p => p.caption.toLowerCase().includes(filterText.toLowerCase()) || (p.tag && p.tag.toLowerCase().includes(filterText.toLowerCase())));
+
+            grid.innerHTML = filtered.map(post => `
+                <div class="relative group aspect-square rounded-2xl overflow-hidden vibe-glass border border-white/10 cursor-pointer">
+                    <img src="${post.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${post.filter}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 text-white text-xs font-bold gap-3">
+                        <span class="flex items-center gap-1"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> ${post.likes}</span>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function filterExploreTag(tag) {
+            AudioFX.clickSound();
+            if(tag === 'All') renderExploreGrid('');
+            else renderExploreGrid(tag);
+        }
+
+        // VIBE STUDIO LAB
+        function updateStudioFilter() {
+            const hue = document.getElementById('studio-hue').value;
+            const saturate = document.getElementById('studio-saturate').value;
+            const contrast = document.getElementById('studio-contrast').value;
+            const brightness = document.getElementById('studio-brightness').value;
+            const blur = document.getElementById('studio-blur').value;
+
+            document.getElementById('val-hue').innerText = `${hue}deg`;
+            document.getElementById('val-saturate').innerText = `${saturate}%`;
+            document.getElementById('val-contrast').innerText = `${contrast}%`;
+            document.getElementById('val-brightness').innerText = `${brightness}%`;
+            document.getElementById('val-blur').innerText = `${blur}px`;
+
+            const img = document.getElementById('studioPreview');
+            img.style.filter = `hue-rotate(${hue}deg) saturate(${saturate}%) contrast(${contrast}%) brightness(${brightness}%) blur(${blur}px)`;
+        }
+
+        function resetStudioFilters() {
+            document.getElementById('studio-hue').value = 0;
+            document.getElementById('studio-saturate').value = 100;
+            document.getElementById('studio-contrast').value = 100;
+            document.getElementById('studio-brightness').value = 100;
+            document.getElementById('studio-blur').value = 0;
+            updateStudioFilter();
+        }
+
+        function loadStudioUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('studioPreview').src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function postFromStudio() {
+            AudioFX.likeSound();
+            const src = document.getElementById('studioPreview').src;
+            const filterStyle = document.getElementById('studioPreview').style.filter;
+
+            const newPost = {
+                id: Date.now(),
+                user: 'elena_vibes',
+                location: 'Vibe Studio Grid',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                image: src,
+                caption: 'Created with custom photo studio parameters ✨',
+                filter: '',
+                tag: 'Art',
+                likes: 1,
+                liked: true,
+                saved: false,
+                comments: []
+            };
+
+            STATE.posts.unshift(newPost);
+            saveState();
+            switchTab('home');
+            renderFeedPosts();
+            triggerToast('Published!', 'Studio post live on feed');
+        }
+
+        // MODAL POST CREATOR
+        function openCreateModal() { AudioFX.clickSound(); document.getElementById('createModal').classList.remove('hidden'); }
+        function closeCreateModal() { document.getElementById('createModal').classList.add('hidden'); }
+
+        function setModalFilter(f) {
+            STATE.currentModalFilter = f;
+            document.getElementById('createModalPreview').className = `w-full h-full object-cover ${f}`;
+        }
+
+        function handleModalUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('createModalPreview').src = evt.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitNewPost() {
+            AudioFX.likeSound();
+            const urlInput = document.getElementById('createModalUrl').value;
+            const caption = document.getElementById('createModalCaption').value;
+            const location = document.getElementById('createModalLocation').value;
+            const imgSrc = urlInput || document.getElementById('createModalPreview').src;
+
+            const newPost = {
+                id: Date.now(),
+                user: 'elena_vibes',
+                location: location || 'Global Sphere',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                image: imgSrc,
+                caption: caption || 'New atmosphere live ⚡',
+                filter: STATE.currentModalFilter,
+                tag: 'Cyberpunk',
+                likes: 1,
+                liked: true,
+                saved: false,
+                comments: []
+            };
+
+            STATE.posts.unshift(newPost);
+            saveState();
+            closeCreateModal();
+            renderFeedPosts();
+            renderProfileGrid();
+            triggerToast('Broadcast Live', 'New vibe added to feed');
+        }
+
+        // PROFILE SUBTABS
+        function switchProfileSubtab(tab) {
+            AudioFX.clickSound();
+            STATE.profileSubtab = tab;
+            ['my', 'saved', 'liked'].forEach(t => {
+                const el = document.getElementById(`subtab-${t}`);
+                if(t === tab) el.className = 'pb-3 text-pink-400 border-b-2 border-pink-400';
+                else el.className = 'pb-3 text-gray-400 hover:text-white';
+            });
+            renderProfileGrid();
+        }
+
+        function renderProfileGrid() {
+            const grid = document.getElementById('profileGrid');
+            let items = STATE.posts;
+
+            if(STATE.profileSubtab === 'saved') items = STATE.posts.filter(p => p.saved);
+            else if(STATE.profileSubtab === 'liked') items = STATE.posts.filter(p => p.liked);
+
+            document.getElementById('profilePostCount').innerText = STATE.posts.length;
+
+            grid.innerHTML = items.map(post => `
+                <div class="relative group aspect-square rounded-2xl overflow-hidden vibe-glass border border-white/10 cursor-pointer">
+                    <img src="${post.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ${post.filter}">
+                </div>
+            `).join('');
+        }
+
+        // STORIES MODAL ENGINE
+        function openStoryModal(index) {
+            AudioFX.clickSound();
+            STATE.currentStoryIndex = index;
+            const story = STORIES[index];
+            document.getElementById('storyModalUser').innerText = `@${story.user}`;
+            document.getElementById('storyModalAvatar').src = story.avatar;
+            document.getElementById('storyModalImg').src = story.img;
+
+            document.getElementById('storyModal').classList.remove('hidden');
+            startStoryTimer();
+        }
+
+        function closeStoryModal() {
+            document.getElementById('storyModal').classList.add('hidden');
+            clearInterval(STATE.storyTimer);
+        }
+
+        function startStoryTimer() {
+            clearInterval(STATE.storyTimer);
+            let progress = 0;
+            const bar = document.getElementById('storyProgressBar');
+            bar.style.width = '0%';
+
+            STATE.storyTimer = setInterval(() => {
+                progress += 2;
+                bar.style.width = `${progress}%`;
+                if(progress >= 100) {
+                    clearInterval(STATE.storyTimer);
+                    nextStory();
+                }
+            }, 100);
+        }
+
+        function nextStory() {
+            if(STATE.currentStoryIndex < STORIES.length - 1) {
+                openStoryModal(STATE.currentStoryIndex + 1);
+            } else {
+                closeStoryModal();
+            }
+        }
+
+        function prevStory() {
+            if(STATE.currentStoryIndex > 0) {
+                openStoryModal(STATE.currentStoryIndex - 1);
+            }
+        }
+
+        function toggleNotificationsDrawer() {
+            const drawer = document.getElementById('notificationsDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function triggerToast(title, msg) {
+            const toast = document.getElementById('toastHud');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = msg;
+
+            toast.classList.remove('-translate-y-40');
+            setTimeout(() => {
+                toast.classList.add('-translate-y-40');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
